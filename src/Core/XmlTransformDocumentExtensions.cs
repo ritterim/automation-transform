@@ -1,7 +1,6 @@
-﻿using System;
-using System.Xml;
+﻿using System.Xml;
 
-namespace Automation.Transform
+namespace RimDev.Automation.Transform
 {
     public static class XmlTransformDocumentExtensions
     {

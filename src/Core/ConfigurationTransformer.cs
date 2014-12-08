@@ -4,7 +4,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.Web.XmlTransform;
 
-namespace Automation.Transform
+namespace RimDev.Automation.Transform
 {
     public class ConfigurationTransformer : IDisposable
     {
