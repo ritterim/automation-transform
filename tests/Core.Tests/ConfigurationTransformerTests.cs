@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Automation.Transform.Tests
+namespace RimDev.Automation.Transform
 {
     public class ConfigurationTransformerTests
     {
