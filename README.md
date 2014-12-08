@@ -1,1 +1,52 @@
+# Automation : Transform
 
+This library is designed to allow the modification of configuration files via the [Microsoft.Web.Xdt](http://www.nuget.org/packages/Microsoft.Web.Xdt/) library. It uses the transform syntax that we all know and love. You can utilize this library **in memory** with no need to access any files, but you can do that as well.
+
+## Quick Start
+
+You can install this package via [Nuget](http://nuget.org) under the package id of [RimDev.Automation.Transform](http://www.nuget.org/packages/RimDev.Automation.Transform/).
+
+```
+ PM> Install-Package RimDev.Automation.Transform
+```
+
+Next step is to have a *source* and a *transform* file ready. Please read the [transformation documentation](http://msdn.microsoft.com/en-us/library/dd465326%28v=vs.110%29.aspx) before attempting to use this library.
+
+When you have your files ready, you can perform a transformation with the following code.
+
+```
+using (var transformer = new ConfigurationTransformer()) {
+  var result
+  = transformer
+  .SetSourceFromFile("web.config")
+  .SetTransformFromFile("web.debug.config")
+  .Apply("web.transformed.config");
+}
+```
+
+## Transformation Extensions
+
+You get a few methods that allow you to construct transformations programatically.
+
+1. InsertAppSetting
+2. ReplaceAppSetting
+3. InsertSqlConnectionString
+4. ReplaceConnectionString
+5. InsertConnectionString
+6. ReplaceConnectionString
+
+```
+using (var transformer = new ConfigurationTransformer()) {
+  transformer
+  .SetSourceFromFile("web.config")
+  .Transform.InsertAppSetting("hello", "world");
+
+  var result =   transformer.Apply("web.transformed.config");
+}
+```
+
+The methods utilize the transform syntax, and append it to your transformation config. You can load an existing transform while still appending additional programatic values.
+
+## Thanks
+
+Thanks to [Ritter IM](http://ritterim.com) for supporting OSS.
