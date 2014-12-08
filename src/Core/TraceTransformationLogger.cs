@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Microsoft.Web.XmlTransform;
 
-namespace Automation.Transform
+namespace RimDev.Automation.Transform
 {
     /// <summary>
     /// Logs the output of the transformation task to the <see cref="System.Diagnostics.Trace"/>.
