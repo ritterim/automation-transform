@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Collections.Generic;
+using System.Xml;
 
 namespace RimDev.Automation.Transform
 {
@@ -71,5 +72,29 @@ namespace RimDev.Automation.Transform
         {
             ReplaceConnectionString(document, name, connectionString, "System.Data.SqlClient");
         }
+
+        public static void InsertCustomErrorsSetting(this XmlDocument document, string mode, string defaultRedirect, Dictionary<string,string> errors )
+        {
+            var systemWeb = document.DocumentElement.SelectSingleNode("system.web") ??
+                            document.CreateNode(XmlNodeType.Element, "system.web", "");
+
+            var customErrorsSettings = document.CreateElement("customErrors");
+            customErrorsSettings.SetAttribute("mode", mode);
+            customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
+            customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
+
+            foreach (var error in errors)
+            {
+                var element = document.CreateElement("error");
+                element.SetAttribute("statusCode", error.Key);
+                element.SetAttribute("redirect", error.Value);
+                element.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
+                customErrorsSettings.AppendChild(element);
+            }
+
+            systemWeb.AppendChild(customErrorsSettings);
+            document.DocumentElement.AppendChild(systemWeb);
+        }
+
     }
 }
