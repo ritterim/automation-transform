@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace RimDev.Automation.Transform
@@ -73,7 +74,26 @@ namespace RimDev.Automation.Transform
             ReplaceConnectionString(document, name, connectionString, "System.Data.SqlClient");
         }
 
-        public static void InsertCustomErrorsSetting(this XmlDocument document, string mode, string defaultRedirect, Dictionary<string,string> errors )
+        public static XmlDocument InsertCustomErrorsSetting(this XmlDocument document, string mode, string defaultRedirect, Action<CustomErrorBuilder> builder = null)
+        {
+            var systemWeb = document.DocumentElement.SelectSingleNode("system.web") ??
+                            document.CreateNode(XmlNodeType.Element, "system.web", "");
+
+            var customErrorsSettings = document.CreateElement("customErrors");//here i am assuming that customErrors doesnt already exist. what if they just wanted to insert an <errors> child?
+            customErrorsSettings.SetAttribute("mode", mode);
+            customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
+            customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
+
+            if (builder != null)
+                builder(new CustomErrorBuilder(document, customErrorsSettings));
+
+            systemWeb.AppendChild(customErrorsSettings);
+            document.DocumentElement.AppendChild(systemWeb); //if this already existed i probably don't want to do this?
+
+            return document;
+        }
+
+        public static XmlDocument ReplaceCustomErrorsSetting(this XmlDocument document, string mode, string defaultRedirect, Action<CustomErrorBuilder> builder = null)
         {
             var systemWeb = document.DocumentElement.SelectSingleNode("system.web") ??
                             document.CreateNode(XmlNodeType.Element, "system.web", "");
@@ -81,20 +101,43 @@ namespace RimDev.Automation.Transform
             var customErrorsSettings = document.CreateElement("customErrors");
             customErrorsSettings.SetAttribute("mode", mode);
             customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
-            customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
+            customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Replace");
+            customErrorsSettings.SetAttribute("Locator", ConfigurationTransformer.TransformNamespace, "Match(name)");
 
-            foreach (var error in errors)
-            {
-                var element = document.CreateElement("error");
-                element.SetAttribute("statusCode", error.Key);
-                element.SetAttribute("redirect", error.Value);
-                element.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
-                customErrorsSettings.AppendChild(element);
-            }
-
+            if (builder != null)
+                builder(new CustomErrorBuilder(document, customErrorsSettings));
+            
             systemWeb.AppendChild(customErrorsSettings);
             document.DocumentElement.AppendChild(systemWeb);
+
+            return document;
         }
 
+        public class CustomErrorBuilder
+        {
+            private readonly XmlDocument _document;
+            private readonly XmlElement _customErrorElement;
+
+            public CustomErrorBuilder(XmlDocument document, XmlElement customErrorElement)
+            {
+                _document = document;
+                _customErrorElement = customErrorElement;
+            }
+
+            public CustomErrorBuilder AddError(int statusCode, string redirect)
+            {
+                var element = _document.CreateElement("error");
+                element.SetAttribute("statusCode", statusCode.ToString());
+                element.SetAttribute("redirect", redirect);
+                _customErrorElement.AppendChild(element);
+
+                return this;
+            }
+
+            public XmlDocument Done()
+            {
+                return _document;
+            }
+        }
     }
 }

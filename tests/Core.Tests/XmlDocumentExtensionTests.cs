@@ -63,22 +63,51 @@ namespace RimDev.Automation.Transform
         [Fact]
         public void Can_add_insert_customError_setting()
         {
-            var errors = new Dictionary<string, string> {{"404", "/404NotFound"}, {"500", "/500InternalServerError"}};
-            Document.InsertCustomErrorsSetting("ON","http://www.ritterim.com",errors);
-            var node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
+            var document = Document.InsertCustomErrorsSetting("ON", "/error", customErrors =>
+            {
+                customErrors.AddError(400, "~/error/400");
+                customErrors.AddError(500, "~/error/500");
+            });
+
+            var node = Document.SelectSingleNode("//configuration/system.web[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
             Assert.NotNull(node);
             Assert.Equal("ON", node.Attributes["mode"].Value);
-            Assert.Equal("http://www.ritterim.com", node.Attributes["defaultRedirect"].Value);
+            Assert.Equal("/error", node.Attributes["defaultRedirect"].Value);
             Assert.Equal("Insert", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
 
             Assert.Equal(2, node.ChildNodes.Count);
-            Assert.Equal("Insert", node.FirstChild.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
-            Assert.Equal("404", node.FirstChild.Attributes["statusCode"].Value);
-            Assert.Equal("/404NotFound", node.FirstChild.Attributes["redirect"].Value);
+            Assert.Equal("400", node.FirstChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/400", node.FirstChild.Attributes["redirect"].Value);
 
-            Assert.Equal("Insert", node.LastChild.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
             Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
-            Assert.Equal("/500InternalServerError", node.LastChild.Attributes["redirect"].Value);
+            Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
+        }
+
+        [Fact]
+        public void Can_add_replace_customError_setting()
+        {
+            var document = Document.ReplaceCustomErrorsSetting("ON", "/error", customErrors =>
+            {
+                customErrors.AddError(400, "~/error/400");
+                customErrors.AddError(500, "~/error/500");
+                });
+
+            var node = Document.SelectSingleNode("//configuration/system.web[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
+            Assert.NotNull(node);
+            Assert.Equal("ON", node.Attributes["mode"].Value);
+            Assert.Equal("/error", node.Attributes["defaultRedirect"].Value);
+            Assert.Equal("Replace", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
+
+            Assert.Equal(2, node.ChildNodes.Count);
+            Assert.Equal("400", node.FirstChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/400", node.FirstChild.Attributes["redirect"].Value);
+
+            Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
         }
     }
 }
