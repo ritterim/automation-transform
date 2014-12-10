@@ -6,7 +6,7 @@ namespace RimDev.Automation.Transform
 {
     public static class XmlTransformDocumentExtensions
     {
-        public static void InsertAppSetting(this XmlDocument document, string key, string value)
+        public static XmlDocument InsertAppSetting(this XmlDocument document, string key, string value)
         {
             var appSettings = document.DocumentElement.SelectSingleNode("appSettings");
 
@@ -16,9 +16,10 @@ namespace RimDev.Automation.Transform
             node.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
 
             appSettings.AppendChild(node);
+            return document;
         }
 
-        public static void ReplaceAppSetting(this XmlDocument document, string key, string value)
+        public static XmlDocument ReplaceAppSetting(this XmlDocument document, string key, string value)
         {
             var appSettings = document.DocumentElement.SelectSingleNode("appSettings");
 
@@ -29,9 +30,10 @@ namespace RimDev.Automation.Transform
             node.SetAttribute("Locator", ConfigurationTransformer.TransformNamespace, "Match(key)");
 
             appSettings.AppendChild(node);
+            return document;
         }
 
-        public static void InsertConnectionString(this XmlDocument document, string name, string connectionString, string providerName = null)
+        public static XmlDocument InsertConnectionString(this XmlDocument document, string name, string connectionString, string providerName = null)
         {
             var appSettings = document.DocumentElement.SelectSingleNode("connectionStrings");
 
@@ -45,9 +47,10 @@ namespace RimDev.Automation.Transform
             node.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
 
             appSettings.AppendChild(node);
+            return document;
         }
 
-        public static void ReplaceConnectionString(this XmlDocument document, string name, string connectionString, string providerName = null)
+        public static XmlDocument ReplaceConnectionString(this XmlDocument document, string name, string connectionString, string providerName = null)
         {
             var appSettings = document.DocumentElement.SelectSingleNode("connectionStrings");
 
@@ -62,16 +65,19 @@ namespace RimDev.Automation.Transform
             node.SetAttribute("Locator", ConfigurationTransformer.TransformNamespace, "Match(name)");
 
             appSettings.AppendChild(node);
+            return document;
         }
 
-        public static void InsertSqlConnectionString(this XmlDocument document, string name, string connectionString)
+        public static XmlDocument InsertSqlConnectionString(this XmlDocument document, string name, string connectionString)
         {
-            InsertConnectionString(document, name, connectionString, "System.Data.SqlClient");
+            document = InsertConnectionString(document, name, connectionString, "System.Data.SqlClient");
+            return document;
         }
 
-        public static void ReplaceSqlConnectionString(this XmlDocument document, string name, string connectionString)
+        public static XmlDocument ReplaceSqlConnectionString(this XmlDocument document, string name, string connectionString)
         {
-            ReplaceConnectionString(document, name, connectionString, "System.Data.SqlClient");
+            document= ReplaceConnectionString(document, name, connectionString, "System.Data.SqlClient");
+            return document;
         }
 
         public static XmlDocument InsertCustomErrorsSetting(this XmlDocument document, string mode, string defaultRedirect, Action<CustomErrorBuilder> builder = null)
