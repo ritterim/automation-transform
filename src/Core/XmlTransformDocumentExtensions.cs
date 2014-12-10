@@ -133,11 +133,6 @@ namespace RimDev.Automation.Transform
 
                 return this;
             }
-
-            public XmlDocument Done()
-            {
-                return _document;
-            }
         }
     }
 }
