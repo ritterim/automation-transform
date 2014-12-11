@@ -194,13 +194,5 @@ namespace RimDev.Automation.Transform
             Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
             Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
         }
-
-        public XmlTransformDocumentExtensions.CustomErrorBuilder CustomErrorBuilder(XmlDocument document,
-            XmlElement customErrorElement)
-        {
-            var customErrorBuilder = new XmlTransformDocumentExtensions.CustomErrorBuilder(document, customErrorElement);
-            customErrorBuilder.AddError(400, "~/error/400").AddError(500, "~/error/500");
-            return customErrorBuilder;
-        }
     }
 }

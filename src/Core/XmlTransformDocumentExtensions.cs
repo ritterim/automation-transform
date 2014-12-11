@@ -97,16 +97,11 @@ namespace RimDev.Automation.Transform
             attribute.Value = "Insert";
             customErrors.Attributes.Append(attribute);
 
-            //var customErrorsSettings = document.CreateElement("customErrors");//here i am assuming that customErrors doesnt already exist. what if they just wanted to insert an <errors> child?
-            //customErrorsSettings.SetAttribute("mode", mode);
-            //customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
-            //customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
-
             if (builder != null)
                 builder(new CustomErrorBuilder(document, customErrors));
 
             systemWeb.AppendChild(customErrors);
-            document.DocumentElement.AppendChild(systemWeb); //if this already existed i probably don't want to do this?
+            document.DocumentElement.AppendChild(systemWeb); 
 
             return document;
         }
