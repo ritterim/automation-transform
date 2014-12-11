@@ -84,16 +84,28 @@ namespace RimDev.Automation.Transform
         {
             var systemWeb = document.DocumentElement.SelectSingleNode("system.web") ??
                             document.CreateNode(XmlNodeType.Element, "system.web", "");
+            var customErrors = systemWeb.SelectSingleNode("customErrors") ??
+                               document.CreateNode(XmlNodeType.Element, "customErrors", "");
 
-            var customErrorsSettings = document.CreateElement("customErrors");//here i am assuming that customErrors doesnt already exist. what if they just wanted to insert an <errors> child?
-            customErrorsSettings.SetAttribute("mode", mode);
-            customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
-            customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
+            var attribute = document.CreateAttribute("mode");
+            attribute.Value = mode;
+            customErrors.Attributes.Append(attribute);
+            attribute = document.CreateAttribute("defaultRedirect");
+            attribute.Value = defaultRedirect;
+            customErrors.Attributes.Append(attribute);
+            attribute = document.CreateAttribute("Transform", ConfigurationTransformer.TransformNamespace);
+            attribute.Value = "Insert";
+            customErrors.Attributes.Append(attribute);
+
+            //var customErrorsSettings = document.CreateElement("customErrors");//here i am assuming that customErrors doesnt already exist. what if they just wanted to insert an <errors> child?
+            //customErrorsSettings.SetAttribute("mode", mode);
+            //customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
+            //customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Insert");
 
             if (builder != null)
-                builder(new CustomErrorBuilder(document, customErrorsSettings));
+                builder(new CustomErrorBuilder(document, customErrors));
 
-            systemWeb.AppendChild(customErrorsSettings);
+            systemWeb.AppendChild(customErrors);
             document.DocumentElement.AppendChild(systemWeb); //if this already existed i probably don't want to do this?
 
             return document;
@@ -103,17 +115,26 @@ namespace RimDev.Automation.Transform
         {
             var systemWeb = document.DocumentElement.SelectSingleNode("system.web") ??
                             document.CreateNode(XmlNodeType.Element, "system.web", "");
+            var customErrors = systemWeb.SelectSingleNode("customErrors") ??
+                               document.CreateNode(XmlNodeType.Element, "customErrors", "");
 
-            var customErrorsSettings = document.CreateElement("customErrors");
-            customErrorsSettings.SetAttribute("mode", mode);
-            customErrorsSettings.SetAttribute("defaultRedirect", defaultRedirect);
-            customErrorsSettings.SetAttribute("Transform", ConfigurationTransformer.TransformNamespace, "Replace");
-            customErrorsSettings.SetAttribute("Locator", ConfigurationTransformer.TransformNamespace, "Match(name)");
+            var attribute = document.CreateAttribute("mode");
+            attribute.Value = mode;
+            customErrors.Attributes.Append(attribute);
+            attribute = document.CreateAttribute("defaultRedirect");
+            attribute.Value = defaultRedirect;
+            customErrors.Attributes.Append(attribute);
+            attribute = document.CreateAttribute("Transform", ConfigurationTransformer.TransformNamespace);
+            attribute.Value = "Replace";
+            customErrors.Attributes.Append(attribute);
+            attribute = document.CreateAttribute("Locator", ConfigurationTransformer.TransformNamespace);
+            attribute.Value = "Match(name)";
+            customErrors.Attributes.Append(attribute);
 
             if (builder != null)
-                builder(new CustomErrorBuilder(document, customErrorsSettings));
-            
-            systemWeb.AppendChild(customErrorsSettings);
+                builder(new CustomErrorBuilder(document, customErrors));
+
+            systemWeb.AppendChild(customErrors);
             document.DocumentElement.AppendChild(systemWeb);
 
             return document;
@@ -122,9 +143,9 @@ namespace RimDev.Automation.Transform
         public class CustomErrorBuilder
         {
             private readonly XmlDocument _document;
-            private readonly XmlElement _customErrorElement;
+            private readonly XmlNode _customErrorElement;
 
-            public CustomErrorBuilder(XmlDocument document, XmlElement customErrorElement)
+            public CustomErrorBuilder(XmlDocument document, XmlNode customErrorElement)
             {
                 _document = document;
                 _customErrorElement = customErrorElement;
