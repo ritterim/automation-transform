@@ -69,7 +69,20 @@ namespace RimDev.Automation.Transform
                 customErrors.AddError(500, "~/error/500");
             });
 
-            Assert_insert_custom_Error_settings();
+            var node = Document.SelectSingleNode("//configuration/system.web[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
+            Assert.NotNull(node);
+            Assert.Equal("ON", node.Attributes["mode"].Value);
+            Assert.Equal("/error", node.Attributes["defaultRedirect"].Value);
+            Assert.Equal("Insert", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
+
+            Assert.Equal(2, node.ChildNodes.Count);
+            Assert.Equal("400", node.FirstChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/400", node.FirstChild.Attributes["redirect"].Value);
+
+            Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
         }
 
         [Fact]
@@ -81,7 +94,20 @@ namespace RimDev.Automation.Transform
                 customErrors.AddError(500, "~/error/500");
                 });
 
-            Assert_replace_custom_Error_settings();
+            var node = Document.SelectSingleNode("//configuration/system.web[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
+            Assert.NotNull(node);
+            Assert.Equal("ON", node.Attributes["mode"].Value);
+            Assert.Equal("/error", node.Attributes["defaultRedirect"].Value);
+            Assert.Equal("Replace", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
+
+            Assert.Equal(2, node.ChildNodes.Count);
+            Assert.Equal("400", node.FirstChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/400", node.FirstChild.Attributes["redirect"].Value);
+
+            Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
+            Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
         }
 
         [Fact]
@@ -95,10 +121,7 @@ namespace RimDev.Automation.Transform
                 customErrors.AddError(500, "~/error/500");
             });
             var nodes = document.SelectNodes("//configuration/system.web");
-            Assert.Equal(1,nodes.Count);
-
-            Assert_insert_custom_Error_settings();
-            
+            Assert.Equal(1,nodes.Count); 
         }
 
         [Fact]
@@ -113,9 +136,6 @@ namespace RimDev.Automation.Transform
             });
             var nodes = document.SelectNodes("//configuration/system.web");
             Assert.Equal(1, nodes.Count);
-
-            Assert_replace_custom_Error_settings();
-
         }
 
         [Fact]
@@ -134,10 +154,8 @@ namespace RimDev.Automation.Transform
             Assert.Equal(1, nodes.Count);
             nodes = document.SelectNodes("//configuration/system.web/customErrors");
             Assert.Equal(1, nodes.Count);
-
-            Assert_insert_custom_Error_settings();
-
         }
+
         [Fact]
         public void Can_add_replace_customError_setting_systemWeb_customerrors_exists()
         {
@@ -154,45 +172,6 @@ namespace RimDev.Automation.Transform
             Assert.Equal(1, nodes.Count);
             nodes = document.SelectNodes("//configuration/system.web/customErrors");
             Assert.Equal(1, nodes.Count);
-
-            Assert_replace_custom_Error_settings();
-
-        }
-
-        public void Assert_insert_custom_Error_settings()
-        {
-            var node = Document.SelectSingleNode("//configuration/system.web[1]");
-            Assert.NotNull(node);
-            node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
-            Assert.NotNull(node);
-            Assert.Equal("ON", node.Attributes["mode"].Value);
-            Assert.Equal("/error", node.Attributes["defaultRedirect"].Value);
-            Assert.Equal("Insert", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
-
-            Assert.Equal(2, node.ChildNodes.Count);
-            Assert.Equal("400", node.FirstChild.Attributes["statusCode"].Value);
-            Assert.Equal("~/error/400", node.FirstChild.Attributes["redirect"].Value);
-
-            Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
-            Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
-        }
-
-        public void Assert_replace_custom_Error_settings()
-        {
-            var node = Document.SelectSingleNode("//configuration/system.web[1]");
-            Assert.NotNull(node);
-            node = Document.SelectSingleNode("//configuration/system.web/customErrors[1]");
-            Assert.NotNull(node);
-            Assert.Equal("ON", node.Attributes["mode"].Value);
-            Assert.Equal("/error", node.Attributes["defaultRedirect"].Value);
-            Assert.Equal("Replace", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
-
-            Assert.Equal(2, node.ChildNodes.Count);
-            Assert.Equal("400", node.FirstChild.Attributes["statusCode"].Value);
-            Assert.Equal("~/error/400", node.FirstChild.Attributes["redirect"].Value);
-
-            Assert.Equal("500", node.LastChild.Attributes["statusCode"].Value);
-            Assert.Equal("~/error/500", node.LastChild.Attributes["redirect"].Value);
         }
     }
 }
