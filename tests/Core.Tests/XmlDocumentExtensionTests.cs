@@ -208,13 +208,14 @@ namespace RimDev.Automation.Transform
             Assert.Equal(null, node.LastChild.Attributes["targetName"]);
             Assert.Equal(null, node.LastChild.Attributes["userName"]);
         }
+
         [Fact]
         public void Can_add_insert_smtp_setting()
         {
             Document.InsertSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
             {
                 smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
-                smtpBuilder.AddNetwork("clientDomain",true,true,"host","password",180,"targetName","userName");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
             });
 
             var node = Document.SelectSingleNode("//configuration/system.net[1]");
