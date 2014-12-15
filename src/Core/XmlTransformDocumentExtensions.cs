@@ -191,6 +191,41 @@ namespace RimDev.Automation.Transform
             attribute = document.CreateAttribute("Transform", ConfigurationTransformer.TransformNamespace);
             attribute.Value = "Insert";
             smtpNode.Attributes.Append(attribute);
+        public static XmlDocument ReplaceSmtpSetting(this XmlDocument document, SmtpDeliveryFormat? smtpDeliveryFormat = null, SmtpDeliveryMethod? smtpDeliveryMethod = null, string from = null,
+            Action<SmtpBuilder> smtpBuilder = null)
+        {
+            var systemNet = document.DocumentElement.SelectSingleNode("system.net") ??
+                document.CreateNode(XmlNodeType.Element, "system.net", "");
+            var mailSettingsNode = systemNet.SelectSingleNode("mailSettings") ??
+                               document.CreateNode(XmlNodeType.Element, "mailSettings", "");
+            var smtpNode = mailSettingsNode.SelectSingleNode("smtp") ??
+                               document.CreateNode(XmlNodeType.Element, "smtp", "");
+
+            XmlAttribute attribute;
+            if (smtpDeliveryFormat != null)
+            {
+                attribute = document.CreateAttribute("smtpDeliveryFormat");
+                attribute.Value = smtpDeliveryFormat.ToString();
+                smtpNode.Attributes.Append(attribute);
+            }
+            if (smtpDeliveryMethod != null)
+            {
+                attribute = document.CreateAttribute("smtpDeliveryMethod");
+                attribute.Value = smtpDeliveryMethod.ToString();
+                smtpNode.Attributes.Append(attribute);
+            }
+            if (from != null)
+            {
+                attribute = document.CreateAttribute("from");
+                attribute.Value = from;
+                smtpNode.Attributes.Append(attribute);
+            }
+            attribute = document.CreateAttribute("Transform", ConfigurationTransformer.TransformNamespace);
+            attribute.Value = "Replace";
+            smtpNode.Attributes.Append(attribute);
+            attribute = document.CreateAttribute("Locator", ConfigurationTransformer.TransformNamespace);
+            attribute.Value = "Match(name)";
+            smtpNode.Attributes.Append(attribute);
 
             if (smtpBuilder != null)
                 smtpBuilder(new SmtpBuilder(document, smtpNode));
