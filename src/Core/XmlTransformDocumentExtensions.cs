@@ -166,7 +166,7 @@ namespace RimDev.Automation.Transform
                 document.CreateNode(XmlNodeType.Element, "system.net", "");
             var mailSettingsNode = systemNet.SelectSingleNode("mailSettings") ??
                                document.CreateNode(XmlNodeType.Element, "mailSettings", "");
-            var smtpNode = systemNet.SelectSingleNode("smtp") ??
+            var smtpNode = mailSettingsNode.SelectSingleNode("smtp") ??
                                document.CreateNode(XmlNodeType.Element, "smtp", "");
 
             XmlAttribute attribute;
@@ -191,6 +191,17 @@ namespace RimDev.Automation.Transform
             attribute = document.CreateAttribute("Transform", ConfigurationTransformer.TransformNamespace);
             attribute.Value = "Insert";
             smtpNode.Attributes.Append(attribute);
+            
+            if (smtpBuilder != null)
+                smtpBuilder(new SmtpBuilder(document, smtpNode));
+
+            mailSettingsNode.AppendChild(smtpNode);
+            systemNet.AppendChild(mailSettingsNode);
+            document.DocumentElement.AppendChild(systemNet);
+
+            return document;
+        }
+
         public static XmlDocument ReplaceSmtpSetting(this XmlDocument document, SmtpDeliveryFormat? smtpDeliveryFormat = null, SmtpDeliveryMethod? smtpDeliveryMethod = null, string from = null,
             Action<SmtpBuilder> smtpBuilder = null)
         {
