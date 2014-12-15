@@ -34,8 +34,6 @@ You get a few methods that allow you to construct transformations programaticall
 4. ReplaceConnectionString
 5. InsertConnectionString
 6. ReplaceConnectionString
-7. [InsertCustomErrorSettings](http://http://msdn.microsoft.com/en-us/library/h0hfz6fc(v=vs.100).aspx)
-8. [ReplaceCustomErrorSettings](http://http://msdn.microsoft.com/en-us/library/h0hfz6fc(v=vs.100).aspx)
 
 ```
 using (var transformer = new ConfigurationTransformer()) {
