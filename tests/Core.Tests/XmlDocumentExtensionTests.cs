@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Net.Mail;
+using System.Security.Cryptography;
 using System.Xml;
 using Xunit;
 
@@ -171,6 +173,214 @@ namespace RimDev.Automation.Transform
             var nodes = document.SelectNodes("//configuration/system.web");
             Assert.Equal(1, nodes.Count);
             nodes = document.SelectNodes("//configuration/system.web/customErrors");
+            Assert.Equal(1, nodes.Count);
+        }
+
+        [Fact]
+        public void Can_add_insert_smtp_setting_defaultValues()
+        {
+            Document.InsertSmtpSetting(smtpBuilder: smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork();
+            });
+
+            var node = Document.SelectSingleNode("//configuration/system.net[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.net/mailSettings[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.net/mailSettings/smtp[1]");
+            Assert.NotNull(node);
+            Assert.Equal(null, node.Attributes["smtpDeliveryMethod"]);
+            Assert.Equal(null, node.Attributes["smtpDeliveryFormat"]);
+            Assert.Equal(null, node.Attributes["from"]);
+            Assert.Equal("Insert", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
+
+            Assert.Equal(2, node.ChildNodes.Count);
+            Assert.Equal(@"c:\email", node.FirstChild.Attributes["pickupDirectoryLocation"].Value);
+
+            Assert.Equal(null, node.LastChild.Attributes["clientDomain"]);
+            Assert.Equal("False",node.LastChild.Attributes["defaultCredentials"].Value);
+            Assert.Equal("False", node.LastChild.Attributes["enableSSL"].Value);
+            Assert.Equal(null, node.LastChild.Attributes["host"]);
+            Assert.Equal(null, node.LastChild.Attributes["password"]);
+            Assert.Equal("25", node.LastChild.Attributes["port"].Value);
+            Assert.Equal(null, node.LastChild.Attributes["targetName"]);
+            Assert.Equal(null, node.LastChild.Attributes["userName"]);
+        }
+
+        [Fact]
+        public void Can_add_insert_smtp_setting()
+        {
+            Document.InsertSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+
+            var node = Document.SelectSingleNode("//configuration/system.net[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.net/mailSettings[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.net/mailSettings/smtp[1]");
+            Assert.NotNull(node);
+
+            Assert.Equal(SmtpDeliveryFormat.SevenBit.ToString(), node.Attributes["smtpDeliveryFormat"].Value);
+            Assert.Equal(SmtpDeliveryMethod.Network.ToString(), node.Attributes["smtpDeliveryMethod"].Value);
+            Assert.Equal("test@test.com", node.Attributes["from"].Value);
+            Assert.Equal("Insert", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
+
+            Assert.Equal(2, node.ChildNodes.Count);
+            Assert.Equal(@"c:\email", node.FirstChild.Attributes["pickupDirectoryLocation"].Value);
+
+            Assert.Equal("clientDomain", node.LastChild.Attributes["clientDomain"].Value);
+            Assert.Equal("True", node.LastChild.Attributes["defaultCredentials"].Value);
+            Assert.Equal("True", node.LastChild.Attributes["enableSSL"].Value);
+            Assert.Equal("host", node.LastChild.Attributes["host"].Value);
+            Assert.Equal("password", node.LastChild.Attributes["password"].Value);
+            Assert.Equal("180", node.LastChild.Attributes["port"].Value);
+            Assert.Equal("targetName", node.LastChild.Attributes["targetName"].Value);
+            Assert.Equal("userName", node.LastChild.Attributes["userName"].Value);
+        }
+        [Fact]
+        public void Can_add_replace_smtp_setting()
+        {
+            Document.ReplaceSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+
+            var node = Document.SelectSingleNode("//configuration/system.net[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.net/mailSettings[1]");
+            Assert.NotNull(node);
+            node = Document.SelectSingleNode("//configuration/system.net/mailSettings/smtp[1]");
+            Assert.NotNull(node);
+
+            Assert.Equal(SmtpDeliveryFormat.SevenBit.ToString(), node.Attributes["smtpDeliveryFormat"].Value);
+            Assert.Equal(SmtpDeliveryMethod.Network.ToString(), node.Attributes["smtpDeliveryMethod"].Value);
+            Assert.Equal("test@test.com", node.Attributes["from"].Value);
+            Assert.Equal("Replace", node.Attributes["Transform", ConfigurationTransformer.TransformNamespace].Value);
+            Assert.Equal("Match(name)", node.Attributes["Locator", ConfigurationTransformer.TransformNamespace].Value);
+
+            Assert.Equal(2, node.ChildNodes.Count);
+            Assert.Equal(@"c:\email", node.FirstChild.Attributes["pickupDirectoryLocation"].Value);
+
+            Assert.Equal("clientDomain", node.LastChild.Attributes["clientDomain"].Value);
+            Assert.Equal("True", node.LastChild.Attributes["defaultCredentials"].Value);
+            Assert.Equal("True", node.LastChild.Attributes["enableSSL"].Value);
+            Assert.Equal("host", node.LastChild.Attributes["host"].Value);
+            Assert.Equal("password", node.LastChild.Attributes["password"].Value);
+            Assert.Equal("180", node.LastChild.Attributes["port"].Value);
+            Assert.Equal("targetName", node.LastChild.Attributes["targetName"].Value);
+            Assert.Equal("userName", node.LastChild.Attributes["userName"].Value);
+        }
+
+        [Fact]
+        public void Can_add_insert_smtp_setting_systemNet_exists()
+        {
+            var systemNetNode = Document.CreateNode(XmlNodeType.Element, "system.net", "");
+            Document.DocumentElement.AppendChild(systemNetNode);
+            var document = Document.InsertSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+            var nodes = document.SelectNodes("//configuration/system.net");
+            Assert.Equal(1, nodes.Count);
+        }
+
+        [Fact]
+        public void Can_add_replace_smtp_setting_systemNet_exists()
+        {
+            var systemNetNode = Document.CreateNode(XmlNodeType.Element, "system.net", "");
+            Document.DocumentElement.AppendChild(systemNetNode);
+            var document = Document.ReplaceSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+            var nodes = document.SelectNodes("//configuration/system.net");
+            Assert.Equal(1, nodes.Count);
+        }
+
+        [Fact]
+        public void Can_add_insert_smtp_setting_systemNet_mailSettings_exists()
+        {
+            var systemNetNode = Document.CreateNode(XmlNodeType.Element, "system.net", "");
+            var mailSettings = Document.CreateElement("mailSettings");
+            systemNetNode.AppendChild(mailSettings);
+            Document.DocumentElement.AppendChild(systemNetNode);
+            var document = Document.InsertSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+            var nodes = document.SelectNodes("//configuration/system.net");
+            Assert.Equal(1, nodes.Count);
+            nodes = document.SelectNodes("//configuration/system.net/mailSettings");
+            Assert.Equal(1, nodes.Count);
+        }
+
+        [Fact]
+        public void Can_add_replace_smtp_setting_systemNet_mailSettings_exists()
+        {
+            var systemNetNode = Document.CreateNode(XmlNodeType.Element, "system.net", "");
+            var mailSettings = Document.CreateElement("mailSettings");
+            systemNetNode.AppendChild(mailSettings);
+            Document.DocumentElement.AppendChild(systemNetNode);
+            var document = Document.ReplaceSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+            var nodes = document.SelectNodes("//configuration/system.net");
+            Assert.Equal(1, nodes.Count);
+            nodes = document.SelectNodes("//configuration/system.net/mailSettings");
+            Assert.Equal(1, nodes.Count);
+        }
+        [Fact]
+        public void Can_add_insert_smtp_setting_systemNet_mailSettings_smtp_exists()
+        {
+            var systemNetNode = Document.CreateNode(XmlNodeType.Element, "system.net", "");
+            var mailSettings = Document.CreateElement("mailSettings");
+            var smtp = Document.CreateElement("smtp");
+            mailSettings.AppendChild(smtp);
+            systemNetNode.AppendChild(mailSettings);
+            Document.DocumentElement.AppendChild(systemNetNode);
+            var document = Document.InsertSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+            var nodes = document.SelectNodes("//configuration/system.net");
+            Assert.Equal(1, nodes.Count);
+            nodes = document.SelectNodes("//configuration/system.net/mailSettings");
+            Assert.Equal(1, nodes.Count);
+            nodes = document.SelectNodes("//configuration/system.net/mailSettings/smtp");
+            Assert.Equal(1, nodes.Count);
+        }
+
+        [Fact]
+        public void Can_add_replace_smtp_setting_systemNet_mailSettings_smtp_exists()
+        {
+            var systemNetNode = Document.CreateNode(XmlNodeType.Element, "system.net", "");
+            var mailSettings = Document.CreateElement("mailSettings");
+            var smtp = Document.CreateElement("smtp");
+            mailSettings.AppendChild(smtp);
+            systemNetNode.AppendChild(mailSettings);
+            Document.DocumentElement.AppendChild(systemNetNode);
+            var document = Document.ReplaceSmtpSetting(SmtpDeliveryFormat.SevenBit, SmtpDeliveryMethod.Network, "test@test.com", smtpBuilder =>
+            {
+                smtpBuilder.AddSpecifiedPickupDirectory(@"c:\email");
+                smtpBuilder.AddNetwork("clientDomain", true, true, "host", "password", 180, "targetName", "userName");
+            });
+            var nodes = document.SelectNodes("//configuration/system.net");
+            Assert.Equal(1, nodes.Count);
+            nodes = document.SelectNodes("//configuration/system.net/mailSettings");
+            Assert.Equal(1, nodes.Count);
+            nodes = document.SelectNodes("//configuration/system.net/mailSettings/smtp");
             Assert.Equal(1, nodes.Count);
         }
     }
