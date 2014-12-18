@@ -34,8 +34,8 @@ You get a few methods that allow you to construct transformations programaticall
 4. ReplaceSqlConnectionString
 5. InsertConnectionString
 6. ReplaceConnectionString
-7. [InsertCustomErrorSetting](http://http://msdn.microsoft.com/en-us/library/h0hfz6fc(v=vs.100).aspx)
-8. [ReplaceCustomErrorSetting](http://http://msdn.microsoft.com/en-us/library/h0hfz6fc(v=vs.100).aspx)
+7. [InsertCustomErrorSetting](http://msdn.microsoft.com/en-us/library/h0hfz6fc(v=vs.100).aspx)
+8. [ReplaceCustomErrorSetting](http://msdn.microsoft.com/en-us/library/h0hfz6fc(v=vs.100).aspx)
 9. [InsertSmtpSetting](http://msdn.microsoft.com/en-us/library/ms164240%28v=vs.110%29.aspx)
 10. [ReplaceSmtpSetting](http://msdn.microsoft.com/en-us/library/ms164240%28v=vs.110%29.aspx)
 
