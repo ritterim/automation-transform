@@ -73,7 +73,7 @@ using (var transformer = new ConfigurationTransformer()) {
 }
 ```
 
-The **CustomError** and **Smtp** setting methods allow you to pass an Action to specify the child elements of the respective parent. elements. 
+The **CustomError** and **Smtp** setting methods allow you to pass an Action to specify the child elements of the respective parent elements. 
 
 ## Thanks
 
