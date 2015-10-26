@@ -2,6 +2,9 @@
 
 This library is designed to allow the modification of configuration files via the [Microsoft.Web.Xdt](http://www.nuget.org/packages/Microsoft.Web.Xdt/) library. It uses the transform syntax that we all know and love. You can utilize this library **in memory** with no need to access any files, but you can do that as well.
 
+![NuGet Version](https://img.shields.io/nuget/v/RimDev.Automation.Transform.svg)
+![NuGet Download Count](https://img.shields.io/nuget/dt/RimDev.Automation.Transform.svg)
+
 ## Quick Start
 
 You can install this package via [Nuget](http://nuget.org) under the package id of [RimDev.Automation.Transform](http://www.nuget.org/packages/RimDev.Automation.Transform/).
