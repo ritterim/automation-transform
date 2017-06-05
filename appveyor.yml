@@ -1,0 +1,23 @@
+image: Visual Studio 2017
+
+cache:
+  - packages -> **\packages.config
+
+install:
+  - ps: md -force .nuget >$null 2>&1
+  - ps: "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe' -OutFile '.nuget/nuget.exe'"
+
+build_script:
+  - ./build.cmd /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+test: off
+
+artifacts:
+  - path: ./msbuild.log
+  - path: ./artifacts/*.nupkg
+
+deploy:
+  - provider: Environment
+    name: NuGet
+    on:
+      branch: master
